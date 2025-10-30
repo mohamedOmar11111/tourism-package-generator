@@ -288,11 +288,6 @@ export default function App() {
     }));
   };
 
-  const isCarRentalFilled = () => {
-    const { pickupDate, returnDate, pickupLocation, returnLocation, carType } = formData.carRental;
-    return formData.carRental.enabled && pickupDate && returnDate && pickupLocation && returnLocation && carType;
-  };
-
   const generateHTML = () => {
     return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -1351,10 +1346,11 @@ export default function App() {
     }));
   };
 
-  const isCarRentalFilled = () => {
-    const { enabled, pickupDate, returnDate, pickupLocation, returnLocation, carType } = formData.carRental;
-    return enabled && pickupDate && returnDate && pickupLocation && returnLocation && carType;
-  };
+  // This is the duplicate function. I will remove this one.
+  // const isCarRentalFilled = () => {
+  //   const { enabled, pickupDate, returnDate, pickupLocation, returnLocation, carType } = formData.carRental;
+  //   return enabled && pickupDate && returnDate && pickupLocation && returnLocation && carType;
+  // };
 
   const generateAndOpen = () => {
     const htmlContent = generateHTML();
@@ -2097,10 +2093,10 @@ export default function App() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">المسمى الوظيفي للمنسق</label>
                 <input
-                  type="text"
-                  value={formData.coordinatorTitle}
-                  onChange={(e) => updateField('coordinatorTitle', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                    type="text"
+                    value={formData.coordinatorTitle}
+                    onChange={(e) => updateField('coordinatorTitle', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg"
                 />
               </div>
 
