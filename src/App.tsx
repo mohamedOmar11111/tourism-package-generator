@@ -288,6 +288,11 @@ export default function App() {
     }));
   };
 
+  const isCarRentalFilled = () => {
+    const { enabled, pickupDate, returnDate, pickupLocation, returnLocation, carType } = formData.carRental;
+    return enabled && pickupDate && returnDate && pickupLocation && returnLocation && carType;
+  };
+
   const generateHTML = () => {
     return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -1346,12 +1351,6 @@ export default function App() {
     }));
   };
 
-  // This is the duplicate function. I will remove this one.
-  // const isCarRentalFilled = () => {
-  //   const { enabled, pickupDate, returnDate, pickupLocation, returnLocation, carType } = formData.carRental;
-  //   return enabled && pickupDate && returnDate && pickupLocation && returnLocation && carType;
-  // };
-
   const generateAndOpen = () => {
     const htmlContent = generateHTML();
     
@@ -1370,19 +1369,6 @@ export default function App() {
     
     // تنظيف الـ URL بعد 100ms
     setTimeout(() => URL.revokeObjectURL(url), 100);
-  };
-
-  const downloadHTML = () => {
-    const htmlContent = generateHTML();
-    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `عرض-${formData.clientName}-${formData.destination}.html`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   return (
