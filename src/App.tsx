@@ -1,8 +1,62 @@
 import React, { useState } from 'react';
-import { FileText, Download, Plus, Trash2, Calendar, Plane, Hotel, DollarSign } from 'lucide-react';
+import { Download, Plus, Trash2, Calendar, Plane, Hotel, DollarSign, FileText } from 'lucide-react';
+
+interface FlightDetails {
+  date: string;
+  airline: string;
+  airlineLogo: string;
+  departureAirport: string;
+  departureTime: string;
+  arrivalAirport: string;
+  arrivalTime: string;
+  stopover: string;
+}
+
+interface HotelDetails {
+  name: string;
+  link: string;
+  checkIn: string;
+  checkOut: string;
+  nights: string;
+  roomType: string;
+  services: string;
+  imageUrl: string;
+}
+
+interface CarRentalDetails {
+  enabled: boolean;
+  pickupDate: string;
+  returnDate: string;
+  pickupLocation: string;
+  returnLocation: string;
+  carType: string;
+  carImage: string;
+}
+
+interface FormData {
+  clientName: string;
+  destination: string;
+  cities: string;
+  travelDate: string;
+  nights: string;
+  persons: string;
+  level: string;
+  headerImage: string;
+  outboundFlight: FlightDetails;
+  returnFlight: FlightDetails;
+  hotels: HotelDetails[];
+  carRental: CarRentalDetails;
+  totalCost: string;
+  discount: string;
+  discountNote: string;
+  coordinator: string;
+  coordinatorTitle: string;
+  includes: string[];
+  excludes: string[];
+}
 
 export default function App() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     clientName: 'استاذة هند',
     destination: 'جورجيا',
     cities: 'تيبليسي – باكورياني - باتومي',
@@ -10,11 +64,13 @@ export default function App() {
     nights: '6 ليالي',
     persons: 'شخصين',
     level: 'خاص',
+    headerImage: 'https://sfile.chatglm.cn/images-ppt/5a9413eb21e0.jpg',
     
     // معلومات الطيران
     outboundFlight: {
       date: '22-11-2025',
       airline: 'الجزيرة',
+      airlineLogo: 'https://sfile.chatglm.cn/images-ppt/5b756aaef20c.png',
       departureAirport: 'مطار جدة',
       departureTime: '11:10 صباحا',
       arrivalAirport: 'مطار تيبلسي',
@@ -24,6 +80,7 @@ export default function App() {
     returnFlight: {
       date: '28-11-2025',
       airline: 'الجزيرة',
+      airlineLogo: 'https://sfile.chatglm.cn/images-ppt/5b756aaef20c.png',
       departureAirport: 'مطار تيبليسي',
       departureTime: '03:00 مساءا',
       arrivalAirport: 'مطار جدة',
@@ -75,6 +132,17 @@ export default function App() {
       }
     ],
     
+    // استئجار سيارة خاصة
+    carRental: {
+      enabled: false,
+      pickupDate: '',
+      returnDate: '',
+      pickupLocation: '',
+      returnLocation: '',
+      carType: '',
+      carImage: ''
+    },
+    
     // التكلفة
     totalCost: '6,900 ريال',
     discount: 'مطبق خصم',
@@ -102,15 +170,47 @@ export default function App() {
   });
 
   const [activeTab, setActiveTab] = useState('basic');
+  const [imagePreview, setImagePreview] = useState(formData.headerImage);
 
-  const updateField = (field: string, value: any) => {
+  const updateField = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const updateNestedField = (parent: string, field: string, value: any) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // التحقق من أن الملف صورة
+      if (!file.type.startsWith('image/')) {
+        alert('يرجى اختيار ملف صورة فقط');
+        return;
+      }
+
+      // التحقق من حجم الملف (أقل من 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('حجم الصورة كبير جداً. يرجى اختيار صورة أقل من 5MB');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64Image = event.target?.result as string;
+        setFormData(prev => ({ ...prev, headerImage: base64Image }));
+        setImagePreview(base64Image);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    const defaultImage = 'https://sfile.chatglm.cn/images-ppt/5a9413eb21e0.jpg';
+    setFormData(prev => ({ ...prev, headerImage: defaultImage }));
+    setImagePreview(defaultImage);
+  };
+
+  const updateNestedField = <T extends keyof FormData>(parent: T, field: keyof FormData[T], value: any) => {
     setFormData(prev => ({
       ...prev,
-      [parent]: { ...prev[parent], [field]: value }
+      [parent]: { ...(prev[parent] as any), [field]: value }
     }));
   };
 
@@ -137,7 +237,7 @@ export default function App() {
     }));
   };
 
-  const updateHotel = (index: number, field: string, value: any) => {
+  const updateHotel = (index: number, field: keyof HotelDetails, value: any) => {
     setFormData(prev => ({
       ...prev,
       hotels: prev.hotels.map((hotel, i) => 
@@ -160,7 +260,7 @@ export default function App() {
     }));
   };
 
-  const updateInclude = (index: number, value: any) => {
+  const updateInclude = (index: number, value: string) => {
     setFormData(prev => ({
       ...prev,
       includes: prev.includes.map((item, i) => i === index ? value : item)
@@ -181,11 +281,16 @@ export default function App() {
     }));
   };
 
-  const updateExclude = (index: number, value: any) => {
+  const updateExclude = (index: number, value: string) => {
     setFormData(prev => ({
       ...prev,
       excludes: prev.excludes.map((item, i) => i === index ? value : item)
     }));
+  };
+
+  const isCarRentalFilled = () => {
+    const { pickupDate, returnDate, pickupLocation, returnLocation, carType } = formData.carRental;
+    return formData.carRental.enabled && pickupDate && returnDate && pickupLocation && returnLocation && carType;
   };
 
   const generateHTML = () => {
@@ -741,7 +846,7 @@ export default function App() {
             
             <!-- Header Section -->
             <div class="header">
-                <img src="https://sfile.chatglm.cn/images-ppt/5a9413eb21e0.jpg" alt="Destination" class="header-bg">
+                <img src="${formData.headerImage}" alt="Destination" class="header-bg">
                 <div class="header-overlay"></div>
                 <div class="header-content">
                     <h1 class="title">برنامج خاص ل${formData.clientName} ل${formData.destination}</h1>
@@ -774,6 +879,74 @@ export default function App() {
                     </div>
                 </div>
             </div>
+            
+            ${isCarRentalFilled() ? `
+            <!-- Section Divider -->
+            <div class="section-divider">
+                <img src="https://z-cdn-media.chatglm.cn/files/3f0b9cd4-570e-4ebd-8aff-d14b29404d65_pasted_image_1759242842896.png?auth_key=1790778881-ff8d15077da24bdaa583c77bdfed7461-0-a6a4b77eb709f2fa9cfa5d2fb50cc028" alt="Section Divider">
+            </div>
+            
+            <!-- Car Rental Section -->
+            <div class="section">
+                <h3 class="section-title">
+                    <i class="material-icons">directions_car</i>
+                    استئجار سيارة خاصة
+                </h3>
+                
+                <div style="display: flex; gap: 30px; align-items: center;">
+                    ${formData.carRental.carImage ? `
+                    <div style="flex-shrink: 0;">
+                        <img src="${formData.carRental.carImage}" alt="${formData.carRental.carType}" style="width: 250px; height: 180px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+                    </div>
+                    ` : ''}
+                    <div style="flex: 1;">
+                        <div style="background: #f8f5ff; border-radius: 12px; padding: 20px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                <div>
+                                    <div style="font-weight: 600; color: #6191fe; margin-bottom: 5px; display: flex; align-items: center;">
+                                        <i class="material-icons" style="font-size: 18px; margin-left: 5px;">event</i>
+                                        تاريخ الاستلام
+                                    </div>
+                                    <div style="font-size: 15px;">${formData.carRental.pickupDate}</div>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; color: #6191fe; margin-bottom: 5px; display: flex; align-items: center;">
+                                        <i class="material-icons" style="font-size: 18px; margin-left: 5px;">event</i>
+                                        تاريخ التسليم
+                                    </div>
+                                    <div style="font-size: 15px;">${formData.carRental.returnDate}</div>
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                <div>
+                                    <div style="font-weight: 600; color: #6191fe; margin-bottom: 5px; display: flex; align-items: center;">
+                                        <i class="material-icons" style="font-size: 18px; margin-left: 5px;">location_on</i>
+                                        مكان الاستلام
+                                    </div>
+                                    <div style="font-size: 15px;">${formData.carRental.pickupLocation}</div>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; color: #6191fe; margin-bottom: 5px; display: flex; align-items: center;">
+                                        <i class="material-icons" style="font-size: 18px; margin-left: 5px;">location_on</i>
+                                        مكان التسليم
+                                    </div>
+                                    <div style="font-size: 15px;">${formData.carRental.returnLocation}</div>
+                                </div>
+                            </div>
+                            
+                            <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                                <div style="font-weight: 600; color: #8c71f3; margin-bottom: 5px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="material-icons" style="font-size: 20px; margin-left: 5px;">directions_car</i>
+                                    نوع السيارة
+                                </div>
+                                <div style="font-size: 18px; font-weight: 700; color: #6191fe;">${formData.carRental.carType}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
             
             <!-- Section Divider -->
             <div class="section-divider">
@@ -808,7 +981,7 @@ export default function App() {
                             </td>
                             <td>
                                 ${formData.outboundFlight.airline}
-                                <img src="https://sfile.chatglm.cn/images-ppt/5b756aaef20c.png" alt="Airline" class="airline-logo">
+                                <img src="${formData.outboundFlight.airlineLogo}" alt="Airline" class="airline-logo">
                             </td>
                             <td>${formData.outboundFlight.departureAirport}<br>${formData.outboundFlight.departureTime}</td>
                             <td>${formData.outboundFlight.arrivalAirport}<br>${formData.outboundFlight.arrivalTime}</td>
@@ -824,7 +997,7 @@ export default function App() {
                             </td>
                             <td>
                                 ${formData.returnFlight.airline}
-                                <img src="https://sfile.chatglm.cn/images-ppt/5b756aaef20c.png" alt="Airline" class="airline-logo">
+                                <img src="${formData.returnFlight.airlineLogo}" alt="Airline" class="airline-logo">
                             </td>
                             <td>${formData.returnFlight.departureAirport}<br>${formData.returnFlight.departureTime}</td>
                             <td>${formData.returnFlight.arrivalAirport}<br>${formData.returnFlight.arrivalTime}</td>
@@ -1088,15 +1261,132 @@ export default function App() {
 </html>`;
   };
 
+  const downloadHTML = () => {
+    const htmlContent = generateHTML();
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `عرض-${formData.clientName}-${formData.destination}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleAirlineLogoUpload = (e: React.ChangeEvent<HTMLInputElement>, flightType: 'outboundFlight' | 'returnFlight') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('يرجى اختيار ملف صورة فقط');
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        alert('حجم الصورة كبير جداً. يرجى اختيار صورة أقل من 2MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64Image = event.target?.result as string;
+        setFormData(prev => ({
+          ...prev,
+          [flightType]: { ...prev[flightType], airlineLogo: base64Image }
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleHotelImageUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('يرجى اختيار ملف صورة فقط');
+        return;
+      }
+      if (file.size > 3 * 1024 * 1024) {
+        alert('حجم الصورة كبير جداً. يرجى اختيار صورة أقل من 3MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64Image = event.target?.result as string;
+        updateHotel(index, 'imageUrl', base64Image);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const updateCarRental = (field: keyof CarRentalDetails, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      carRental: { ...prev.carRental, [field]: value }
+    }));
+  };
+
+  const handleCarImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('يرجى اختيار ملف صورة فقط');
+        return;
+      }
+      if (file.size > 3 * 1024 * 1024) {
+        alert('حجم الصورة كبير جداً. يرجى اختيار صورة أقل من 3MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64Image = event.target?.result as string;
+        updateCarRental('carImage', base64Image);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const toggleCarRental = () => {
+    setFormData(prev => ({
+      ...prev,
+      carRental: { ...prev.carRental, enabled: !prev.carRental.enabled }
+    }));
+  };
+
+  const isCarRentalFilled = () => {
+    const { enabled, pickupDate, returnDate, pickupLocation, returnLocation, carType } = formData.carRental;
+    return enabled && pickupDate && returnDate && pickupLocation && returnLocation && carType;
+  };
+
   const generateAndOpen = () => {
     const htmlContent = generateHTML();
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-      newWindow.document.write(htmlContent);
-      newWindow.document.close();
-    } else {
-      alert('يرجى السماح بفتح النوافذ المنبثقة في المتصفح');
+    
+    // إنشاء Blob من المحتوى
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    
+    // فتح في نافذة جديدة
+    const newWindow = window.open(url, '_blank');
+    
+    if (!newWindow) {
+      // إذا فشل الفتح، نحاول تحميل الملف
+      alert('تعذر فتح النافذة. سيتم تحميل الملف بدلاً من ذلك.');
+      downloadHTML();
     }
+    
+    // تنظيف الـ URL بعد 100ms
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+  };
+
+  const downloadHTML = () => {
+    const htmlContent = generateHTML();
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `عرض-${formData.clientName}-${formData.destination}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -1105,44 +1395,51 @@ export default function App() {
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-blue-600 mb-2">برنامج توليد عروض السياحة</h1>
+              <h1 className="text-3xl font-bold text-blue-600 mb-2">مخصص عروض شركة اطلالة</h1>
               <p className="text-gray-600">شركة اطلالة للسفر والسياحة</p>
             </div>
             <button
-              onClick={generateAndOpen}
+              onClick={downloadHTML}
               className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl text-lg font-bold"
             >
-              <FileText size={24} />
-              توليد العرض وفتحه
+              <Download size={24} />
+              تحميل العرض
             </button>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 mb-6 border-b">
+          <div className="flex gap-2 mb-6 border-b overflow-x-auto">
             <button
               onClick={() => setActiveTab('basic')}
-              className={`px-6 py-3 font-semibold ${activeTab === 'basic' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+              className={`px-6 py-3 font-semibold whitespace-nowrap ${activeTab === 'basic' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
             >
               <FileText className="inline ml-2" size={18} />
               المعلومات الأساسية
             </button>
             <button
               onClick={() => setActiveTab('flights')}
-              className={`px-6 py-3 font-semibold ${activeTab === 'flights' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+              className={`px-6 py-3 font-semibold whitespace-nowrap ${activeTab === 'flights' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
             >
               <Plane className="inline ml-2" size={18} />
               معلومات الطيران
             </button>
             <button
               onClick={() => setActiveTab('hotels')}
-              className={`px-6 py-3 font-semibold ${activeTab === 'hotels' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+              className={`px-6 py-3 font-semibold whitespace-nowrap ${activeTab === 'hotels' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
             >
               <Hotel className="inline ml-2" size={18} />
               الفنادق
             </button>
             <button
+              onClick={() => setActiveTab('car')}
+              className={`px-6 py-3 font-semibold whitespace-nowrap ${activeTab === 'car' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+            >
+              <Calendar className="inline ml-2" size={18} />
+              استئجار سيارة
+            </button>
+            <button
               onClick={() => setActiveTab('package')}
-              className={`px-6 py-3 font-semibold ${activeTab === 'package' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+              className={`px-6 py-3 font-semibold whitespace-nowrap ${activeTab === 'package' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
             >
               <DollarSign className="inline ml-2" size={18} />
               الباقة والتكلفة
@@ -1152,6 +1449,53 @@ export default function App() {
           {/* Basic Information Tab */}
           {activeTab === 'basic' && (
             <div className="space-y-6">
+              {/* Image Upload Section */}
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border-2 border-purple-200">
+                <h3 className="text-lg font-bold text-purple-700 mb-4">📸 صورة العرض الرئيسية</h3>
+                <div className="flex gap-6 items-start">
+                  <div className="flex-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      اختر صورة لتظهر في رأس العرض (Header)
+                    </label>
+                    <div className="flex gap-3">
+                      <label className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                        <Download size={20} />
+                        رفع صورة جديدة
+                      </label>
+                      {formData.headerImage !== 'https://sfile.chatglm.cn/images-ppt/5a9413eb21e0.jpg' && (
+                        <button
+                          onClick={removeImage}
+                          className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                        >
+                          <Trash2 size={20} />
+                          استخدام الصورة الافتراضية
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-600 mt-3">
+                      💡 يُفضل استخدام صورة بحجم 1200×600 بكسل أو أكبر<br/>
+                      📏 الحد الأقصى: 5MB | الصيغ المقبولة: JPG, PNG, WebP
+                    </p>
+                  </div>
+                  <div className="w-64">
+                    <p className="text-sm font-semibold text-gray-700 mb-2">معاينة الصورة:</p>
+                    <div className="border-4 border-purple-300 rounded-lg overflow-hidden shadow-lg">
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview" 
+                        className="w-full h-40 object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">اسم العميل</label>
@@ -1194,7 +1538,8 @@ export default function App() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">عدد الليالي</label>                  <input
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">عدد الليالي</label>
+                  <input
                     type="text"
                     value={formData.nights}
                     onChange={(e) => updateField('nights', e.target.value)}
@@ -1250,6 +1595,34 @@ export default function App() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     />
                   </div>
+                  
+                  {/* صورة شركة الطيران */}
+                  <div className="col-span-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">شعار شركة الطيران</label>
+                    <div className="flex gap-4 items-center">
+                      <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer text-sm">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleAirlineLogoUpload(e, 'outboundFlight')}
+                          className="hidden"
+                        />
+                        <Download size={18} />
+                        رفع شعار الشركة
+                      </label>
+                      {formData.outboundFlight.airlineLogo && (
+                        <div className="flex items-center gap-2">
+                          <img 
+                            src={formData.outboundFlight.airlineLogo} 
+                            alt="Airline Logo" 
+                            className="h-12 w-auto border border-gray-300 rounded bg-white p-1"
+                          />
+                          <span className="text-xs text-gray-600">✓ تم رفع الشعار</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">مطار الإقلاع</label>
                     <input
@@ -1319,6 +1692,34 @@ export default function App() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     />
                   </div>
+                  
+                  {/* صورة شركة الطيران */}
+                  <div className="col-span-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">شعار شركة الطيران</label>
+                    <div className="flex gap-4 items-center">
+                      <label className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors cursor-pointer text-sm">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleAirlineLogoUpload(e, 'returnFlight')}
+                          className="hidden"
+                        />
+                        <Download size={18} />
+                        رفع شعار الشركة
+                      </label>
+                      {formData.returnFlight.airlineLogo && (
+                        <div className="flex items-center gap-2">
+                          <img 
+                            src={formData.returnFlight.airlineLogo} 
+                            alt="Airline Logo" 
+                            className="h-12 w-auto border border-gray-300 rounded bg-white p-1"
+                          />
+                          <span className="text-xs text-gray-600">✓ تم رفع الشعار</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">مطار الإقلاع</label>
                     <input
@@ -1446,13 +1847,29 @@ export default function App() {
                       />
                     </div>
                     <div className="col-span-2">
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">رابط صورة الفندق</label>
-                      <input
-                        type="text"
-                        value={hotel.imageUrl}
-                        onChange={(e) => updateHotel(index, 'imageUrl', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      />
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">صورة الفندق</label>
+                      <div className="flex gap-4 items-start">
+                        <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer text-sm">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleHotelImageUpload(e, index)}
+                            className="hidden"
+                          />
+                          <Download size={18} />
+                          رفع صورة الفندق
+                        </label>
+                        {hotel.imageUrl && (
+                          <div className="flex items-center gap-3">
+                            <img 
+                              src={hotel.imageUrl} 
+                              alt={hotel.name} 
+                              className="h-20 w-28 object-cover border border-gray-300 rounded"
+                            />
+                            <span className="text-xs text-gray-600">✓ تم رفع الصورة</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1464,6 +1881,171 @@ export default function App() {
                 <Plus size={20} />
                 إضافة فندق جديد
               </button>
+            </div>
+          )}
+
+          {/* Car Rental Tab */}
+          {activeTab === 'car' && (
+            <div className="space-y-6">
+              {/* Toggle Switch - Enhanced */}
+              <div className="bg-gradient-to-r from-green-50 to-blue-50 p-8 rounded-xl border-4 border-green-300 shadow-lg">
+                <div className="flex items-center justify-between gap-8">
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-bold text-green-700 mb-3 flex items-center gap-2">
+                      🚗 استئجار سيارة خاصة
+                    </h3>
+                    <p className="text-gray-700 text-base font-medium">
+                      فعّل هذا الخيار إذا كان العرض يتضمن استئجار سيارة خاصة
+                    </p>
+                  </div>
+                  
+                  <div className="flex flex-col items-center gap-3">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.carRental.enabled}
+                        onChange={toggleCarRental}
+                        className="sr-only peer"
+                      />
+                      <div className="w-20 h-10 bg-green-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:right-[6px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-8 after:w-8 after:transition-all peer-checked:bg-green-600 shadow-lg"></div>
+                    </label>
+                    <span className={`text-sm font-bold px-4 py-1 rounded-full ${formData.carRental.enabled ? 'bg-green-600 text-white' : 'bg-green-300 text-green-800'}`}>
+                      {formData.carRental.enabled ? '✓ مفعّل' : '✗ غير مفعّل'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {formData.carRental.enabled && (
+                <>
+                  {/* Car Image Upload */}
+                  <div className="bg-blue-50 p-6 rounded-lg">
+                    <h3 className="text-lg font-bold text-blue-700 mb-4">📸 صورة السيارة</h3>
+                    <div className="flex gap-6 items-start">
+                      <div className="flex-1">
+                        <label className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleCarImageUpload}
+                            className="hidden"
+                          />
+                          <Download size={20} />
+                          رفع صورة السيارة
+                        </label>
+                        <p className="text-xs text-gray-600 mt-3">
+                          💡 يُفضل استخدام صورة واضحة للسيارة<br/>
+                          📏 الحد الأقصى: 3MB
+                        </p>
+                      </div>
+                      {formData.carRental.carImage && (
+                        <div className="w-64">
+                          <p className="text-sm font-semibold text-gray-700 mb-2">معاينة:</p>
+                          <div className="border-4 border-blue-300 rounded-lg overflow-hidden shadow-lg">
+                            <img 
+                              src={formData.carRental.carImage} 
+                              alt="Car Preview" 
+                              className="w-full h-40 object-cover"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Car Rental Details */}
+                  <div className="bg-gray-50 p-6 rounded-lg">
+                    <h3 className="text-lg font-bold text-gray-700 mb-4">تفاصيل الاستئجار</h3>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">تاريخ الاستلام</label>
+                        <input
+                          type="text"
+                          value={formData.carRental.pickupDate}
+                          onChange={(e) => updateCarRental('pickupDate', e.target.value)}
+                          placeholder="مثال: 22-11-2025"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">تاريخ التسليم</label>
+                        <input
+                          type="text"
+                          value={formData.carRental.returnDate}
+                          onChange={(e) => updateCarRental('returnDate', e.target.value)}
+                          placeholder="مثال: 28-11-2025"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">مكان الاستلام</label>
+                        <input
+                          type="text"
+                          value={formData.carRental.pickupLocation}
+                          onChange={(e) => updateCarRental('pickupLocation', e.target.value)}
+                          placeholder="مثال: مطار تيبليسي الدولي"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">مكان التسليم</label>
+                        <input
+                          type="text"
+                          value={formData.carRental.returnLocation}
+                          onChange={(e) => updateCarRental('returnLocation', e.target.value)}
+                          placeholder="مثال: مطار تيبليسي الدولي"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">نوع السيارة</label>
+                        <input
+                          type="text"
+                          value={formData.carRental.carType}
+                          onChange={(e) => updateCarRental('carType', e.target.value)}
+                          placeholder="مثال: تويوتا كامري 2024 أو مرسيدس S-Class"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Preview Status */}
+                  <div className={`p-4 rounded-lg border-2 ${isCarRentalFilled() ? 'bg-green-50 border-green-300' : 'bg-yellow-50 border-yellow-300'}`}>
+                    <div className="flex items-center gap-2">
+                      {isCarRentalFilled() ? (
+                        <>
+                          <span className="text-green-600 text-xl">✓</span>
+                          <span className="text-green-800 font-semibold">
+                            تم ملء جميع البيانات - سيظهر قسم استئجار السيارة في العرض النهائي
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-yellow-600 text-xl">⚠</span>
+                          <span className="text-yellow-800 font-semibold">
+                            يرجى ملء جميع الحقول لإظهار قسم استئجار السيارة في العرض النهائي
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {!formData.carRental.enabled && (
+                <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl border-2 border-dashed border-gray-300">
+                  <Calendar size={80} className="mx-auto mb-6 text-gray-400" />
+                  <p className="text-2xl font-bold text-gray-600 mb-3">قسم استئجار السيارة غير مفعّل</p>
+                  <p className="text-lg text-gray-500 mb-6">
+                    قم بتفعيل الزر في الأعلى ☝️ لإضافة تفاصيل استئجار السيارة
+                  </p>
+                  <div className="inline-flex items-center gap-2 px-6 py-3 bg-blue-100 text-blue-800 rounded-lg font-semibold">
+                    <span className="text-2xl">⬆️</span>
+                    <span>اضغط على الزر الأخضر في الأعلى للتفعيل</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
