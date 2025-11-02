@@ -1,8 +1,64 @@
 import React, { useState } from 'react';
 import { Download, Plus, Trash2, Calendar, Plane, Hotel, DollarSign, FileText } from 'lucide-react';
 
+interface Flight {
+  id: number;
+  date: string;
+  airline: string;
+  airlineLogo: string;
+  departureAirport: string;
+  departureTime: string;
+  arrivalAirport: string;
+  arrivalTime: string;
+  stopover: string;
+}
+
+interface HotelDetails {
+  id: number;
+  name: string;
+  link: string;
+  checkIn: string;
+  checkOut: string;
+  nights: string;
+  roomType: string;
+  services: string;
+  imageUrl: string;
+}
+
+interface CarRental {
+  enabled: boolean;
+  pickupDate: string;
+  returnDate: string;
+  pickupLocation: string;
+  returnLocation: string;
+  carType: string;
+  carImage: string;
+}
+
+interface FormData {
+  clientName: string;
+  destination: string;
+  cities: string;
+  travelDate: string;
+  nights: string;
+  persons: string;
+  level: string;
+  headerImage: string;
+  outboundFlights: Flight[];
+  returnFlights: Flight[];
+  hotels: HotelDetails[];
+  carRental: CarRental;
+  totalCost: string;
+  discount: string;
+  discountNote: string;
+  coordinator: string;
+  coordinatorTitle: string;
+  includes: string[];
+  excludes: string[];
+}
+
 export default function TourismPackageGenerator() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     clientName: 'استاذة هند',
     destination: 'جورجيا',
     cities: 'تيبليسي – باكورياني - باتومي',
@@ -90,13 +146,13 @@ export default function TourismPackageGenerator() {
   const [imagePreview, setImagePreview] = useState('https://sfile.chatglm.cn/images-ppt/5a9413eb21e0.jpg');
 
   // Basic field update
-  const updateField = (field, value) => {
+  const updateField = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   // Header image handling
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
         alert('يرجى اختيار ملف صورة فقط');
@@ -108,7 +164,7 @@ export default function TourismPackageGenerator() {
       }
       const reader = new FileReader();
       reader.onload = (event) => {
-        const base64Image = event.target.result;
+        const base64Image = event.target?.result as string;
         setFormData(prev => ({ ...prev, headerImage: base64Image }));
         setImagePreview(base64Image);
       };
@@ -124,7 +180,7 @@ export default function TourismPackageGenerator() {
 
   // Outbound flights management
   const addOutboundFlight = () => {
-    const newFlight = {
+    const newFlight: Flight = {
       id: Date.now(),
       date: '',
       airline: '',
@@ -141,7 +197,7 @@ export default function TourismPackageGenerator() {
     }));
   };
 
-  const removeOutboundFlight = (id) => {
+  const removeOutboundFlight = (id: number) => {
     if (formData.outboundFlights.length <= 1) return;
     setFormData(prev => ({
       ...prev,
@@ -149,7 +205,7 @@ export default function TourismPackageGenerator() {
     }));
   };
 
-  const updateOutboundFlight = (id, field, value) => {
+  const updateOutboundFlight = (id: number, field: keyof Flight, value: any) => {
     setFormData(prev => ({
       ...prev,
       outboundFlights: prev.outboundFlights.map(flight =>
@@ -158,8 +214,8 @@ export default function TourismPackageGenerator() {
     }));
   };
 
-  const handleOutboundLogoUpload = (e, flightId) => {
-    const file = e.target.files[0];
+  const handleOutboundLogoUpload = (e: React.ChangeEvent<HTMLInputElement>, flightId: number) => {
+    const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
         alert('يرجى اختيار ملف صورة فقط');
@@ -171,7 +227,7 @@ export default function TourismPackageGenerator() {
       }
       const reader = new FileReader();
       reader.onload = (event) => {
-        updateOutboundFlight(flightId, 'airlineLogo', event.target.result);
+        updateOutboundFlight(flightId, 'airlineLogo', event.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -179,7 +235,7 @@ export default function TourismPackageGenerator() {
 
   // Return flights management
   const addReturnFlight = () => {
-    const newFlight = {
+    const newFlight: Flight = {
       id: Date.now(),
       date: '',
       airline: '',
@@ -196,7 +252,7 @@ export default function TourismPackageGenerator() {
     }));
   };
 
-  const removeReturnFlight = (id) => {
+  const removeReturnFlight = (id: number) => {
     if (formData.returnFlights.length <= 1) return;
     setFormData(prev => ({
       ...prev,
@@ -204,7 +260,7 @@ export default function TourismPackageGenerator() {
     }));
   };
 
-  const updateReturnFlight = (id, field, value) => {
+  const updateReturnFlight = (id: number, field: keyof Flight, value: any) => {
     setFormData(prev => ({
       ...prev,
       returnFlights: prev.returnFlights.map(flight =>
@@ -213,8 +269,8 @@ export default function TourismPackageGenerator() {
     }));
   };
 
-  const handleReturnLogoUpload = (e, flightId) => {
-    const file = e.target.files[0];
+  const handleReturnLogoUpload = (e: React.ChangeEvent<HTMLInputElement>, flightId: number) => {
+    const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
         alert('يرجى اختيار ملف صورة فقط');
@@ -226,7 +282,7 @@ export default function TourismPackageGenerator() {
       }
       const reader = new FileReader();
       reader.onload = (event) => {
-        updateReturnFlight(flightId, 'airlineLogo', event.target.result);
+        updateReturnFlight(flightId, 'airlineLogo', event.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -234,7 +290,7 @@ export default function TourismPackageGenerator() {
 
   // Hotels management
   const addHotel = () => {
-    const newHotel = {
+    const newHotel: HotelDetails = {
       id: Date.now(),
       name: '',
       link: '',
@@ -251,14 +307,14 @@ export default function TourismPackageGenerator() {
     }));
   };
 
-  const removeHotel = (id) => {
+  const removeHotel = (id: number) => {
     setFormData(prev => ({
       ...prev,
       hotels: prev.hotels.filter(h => h.id !== id)
     }));
   };
 
-  const updateHotel = (id, field, value) => {
+  const updateHotel = (id: number, field: keyof HotelDetails, value: any) => {
     setFormData(prev => ({
       ...prev,
       hotels: prev.hotels.map(hotel =>
@@ -267,8 +323,8 @@ export default function TourismPackageGenerator() {
     }));
   };
 
-  const handleHotelImageUpload = (e, hotelId) => {
-    const file = e.target.files[0];
+  const handleHotelImageUpload = (e: React.ChangeEvent<HTMLInputElement>, hotelId: number) => {
+    const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
         alert('يرجى اختيار ملف صورة فقط');
@@ -280,22 +336,22 @@ export default function TourismPackageGenerator() {
       }
       const reader = new FileReader();
       reader.onload = (event) => {
-        updateHotel(hotelId, 'imageUrl', event.target.result);
+        updateHotel(hotelId, 'imageUrl', event.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
   // Car rental management
-  const updateCarRental = (field, value) => {
+  const updateCarRental = (field: keyof CarRental, value: any) => {
     setFormData(prev => ({
       ...prev,
       carRental: { ...prev.carRental, [field]: value }
     }));
   };
 
-  const handleCarImageUpload = (e) => {
-    const file = e.target.files[0];
+  const handleCarImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
         alert('يرجى اختيار ملف صورة فقط');
@@ -307,7 +363,7 @@ export default function TourismPackageGenerator() {
       }
       const reader = new FileReader();
       reader.onload = (event) => {
-        updateCarRental('carImage', event.target.result);
+        updateCarRental('carImage', event.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -333,14 +389,14 @@ export default function TourismPackageGenerator() {
     }));
   };
 
-  const removeInclude = (index) => {
+  const removeInclude = (index: number) => {
     setFormData(prev => ({
       ...prev,
       includes: prev.includes.filter((_, i) => i !== index)
     }));
   };
 
-  const updateInclude = (index, value) => {
+  const updateInclude = (index: number, value: string) => {
     setFormData(prev => ({
       ...prev,
       includes: prev.includes.map((item, i) => i === index ? value : item)
@@ -354,14 +410,14 @@ export default function TourismPackageGenerator() {
     }));
   };
 
-  const removeExclude = (index) => {
+  const removeExclude = (index: number) => {
     setFormData(prev => ({
       ...prev,
       excludes: prev.excludes.filter((_, i) => i !== index)
     }));
   };
 
-  const updateExclude = (index, value) => {
+  const updateExclude = (index: number, value: string) => {
     setFormData(prev => ({
       ...prev,
       excludes: prev.excludes.map((item, i) => i === index ? value : item)
