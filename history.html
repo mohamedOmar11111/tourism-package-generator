@@ -14,7 +14,10 @@
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto p-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8">سجل عروض السفر</h1>
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">سجل عروض السفر</h1>
+            <a href="index.html" class="text-blue-500 hover:underline">العودة إلى المنشئ</a>
+        </div>
         <div class="bg-white rounded-lg shadow-lg p-8">
             <table class="w-full">
                 <thead>
@@ -25,20 +28,36 @@
                         <th class="text-right p-4"></th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Example Row -->
-                    <tr class="border-b">
-                        <td class="p-4">استاذة هند</td>
-                        <td class="p-4">جورجيا</td>
-                        <td class="p-4">2025-11-11</td>
-                        <td class="p-4">
-                            <a href="package.html?id=123" class="text-blue-500 hover:underline">عرض التفاصيل</a>
-                        </td>
-                    </tr>
-                    <!-- More rows will be added here dynamically -->
+                <tbody id="history-table-body">
+                    <!-- Data will be loaded here dynamically -->
                 </tbody>
             </table>
         </div>
     </div>
+
+    <script>
+        // Dummy data to simulate fetching from a backend
+        const dummyPackages = [
+            { id: '1', clientName: 'استاذة هند', destination: 'جورجيا', createdAt: '2025-11-11' },
+            { id: '2', clientName: 'محمد عمر', destination: 'تركيا', createdAt: '2025-11-10' },
+            { id: '3', clientName: 'فاطمة علي', destination: 'مصر', createdAt: '2025-11-09' },
+        ];
+
+        const historyTableBody = document.getElementById('history-table-body');
+
+        dummyPackages.forEach(pkg => {
+            const row = document.createElement('tr');
+            row.className = 'border-b';
+            row.innerHTML = `
+                <td class="p-4">${pkg.clientName}</td>
+                <td class="p-4">${pkg.destination}</td>
+                <td class="p-4">${pkg.createdAt}</td>
+                <td class="p-4">
+                    <a href="package.html?id=${pkg.id}" class="text-blue-500 hover:underline">عرض التفاصيل</a>
+                </td>
+            `;
+            historyTableBody.appendChild(row);
+        });
+    </script>
 </body>
 </html>

@@ -14,11 +14,51 @@
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto p-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8">تفاصيل عرض السفر</h1>
-        <div class="bg-white rounded-lg shadow-lg p-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">تفاصيل عرض السفر</h1>
+            <a href="history.html" class="text-blue-500 hover:underline">العودة إلى السجل</a>
+        </div>
+        <div id="package-details" class="bg-white rounded-lg shadow-lg p-8">
             <!-- Package details will be loaded here dynamically -->
             <p>يتم تحميل تفاصيل الباقة...</p>
         </div>
     </div>
+
+    <script>
+        // Dummy data - in a real application, this would be fetched from the backend
+        const dummyPackages = {
+            '1': { clientName: 'استاذة هند', destination: 'جورجيا', cities: 'Tbilisi, Batumi', travelDate: '2025-12-01', nights: '7', persons: '2', level: '5 stars', phoneNumber: '123456789' },
+            '2': { clientName: 'محمد عمر', destination: 'تركيا', cities: 'Istanbul, Antalya', travelDate: '2026-01-15', nights: '10', persons: '4', level: '4 stars', phoneNumber: '987654321' },
+            '3': { clientName: 'فاطمة علي', destination: 'مصر', cities: 'Cairo, Luxor, Aswan', travelDate: '2026-02-20', nights: '14', persons: '3', level: '5 stars', phoneNumber: '555555555' },
+        };
+
+        const packageDetailsContainer = document.getElementById('package-details');
+
+        // Get package ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const packageId = urlParams.get('id');
+
+        if (packageId && dummyPackages[packageId]) {
+            const pkg = dummyPackages[packageId];
+            packageDetailsContainer.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div><p class="text-gray-500">اسم العميل:</p><p class="font-bold text-lg">${pkg.clientName}</p></div>
+                    <div><p class="text-gray-500">رقم الجوال:</p><p class="font-bold text-lg">${pkg.phoneNumber}</p></div>
+                    <div><p class="text-gray-500">الوجهة:</p><p class="font-bold text-lg">${pkg.destination}</p></div>
+                    <div><p class="text-gray-500">المدن:</p><p class="font-bold text-lg">${pkg.cities}</p></div>
+                    <div><p class="text-gray-500">تاريخ السفر:</p><p class="font-bold text-lg">${pkg.travelDate}</p></div>
+                    <div><p class="text-gray-500">عدد الليالي:</p><p class="font-bold text-lg">${pkg.nights}</p></div>
+                    <div><p class="text-gray-500">عدد الأفراد:</p><p class="font-bold text-lg">${pkg.persons}</p></div>
+                    <div><p class="text-gray-500">المستوى:</p><p class="font-bold text-lg">${pkg.level}</p></div>
+                </div>
+                <div class="mt-8 flex gap-4">
+                    <a href="index.html?id=${packageId}" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">تعديل</a>
+                    <button onclick="alert('Downloading HTML... (not implemented yet)')" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">تحميل HTML</button>
+                </div>
+            `;
+        } else {
+            packageDetailsContainer.innerHTML = '<p>لم يتم العثور على تفاصيل الباقة.</p>';
+        }
+    </script>
 </body>
 </html>
