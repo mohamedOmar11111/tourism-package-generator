@@ -202,14 +202,10 @@
             const urlParams = new URLSearchParams(window.location.search);
             const packageId = urlParams.get('id');
             if (packageId) {
-              const dummyPackages = {
-                '1': { clientName: 'استاذة هند', destination: 'جورجيا', cities: 'Tbilisi, Batumi', travelDate: '2025-12-01', nights: '7', persons: '2', level: '5 stars', phoneNumber: '123456789' },
-                '2': { clientName: 'محمد عمر', destination: 'تركيا', cities: 'Istanbul, Antalya', travelDate: '2026-01-15', nights: '10', persons: '4', level: '4 stars', phoneNumber: '987654321' },
-                '3': { clientName: 'فاطمة علي', destination: 'مصر', cities: 'Cairo, Luxor, Aswan', travelDate: '2026-02-20', nights: '14', persons: '3', level: '5 stars', phoneNumber: '555555555' },
-              };
-              const pkg = dummyPackages[packageId];
+              const history = JSON.parse(localStorage.getItem('tourism_package_history')) || [];
+              const pkg = history.find(p => p.id == packageId);
               if (pkg) {
-                setFormData(prev => ({...prev, ...pkg}));
+                setFormData(pkg.formData);
               }
             }
           }, []);
