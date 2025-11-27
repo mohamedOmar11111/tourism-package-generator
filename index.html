@@ -953,7 +953,32 @@
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
+            savePackage(false);
           };
+
+          const savePackage = (showAlert = true) => {
+            const packageToSave = {
+              id: Date.now(),
+              clientName: formData.clientName,
+              destination: formData.destination,
+              createdAt: new Date().toISOString(),
+              formData: formData,
+            };
+
+            const history = JSON.parse(localStorage.getItem('tourism_package_history')) || [];
+            
+            // Prevent saving duplicates in a row
+            const lastSavedPackage = history[history.length - 1];
+            if (lastSavedPackage && JSON.stringify(lastSavedPackage.formData) === JSON.stringify(packageToSave.formData)) {
+              if(showAlert) alert('This package is already the latest in the history.');
+              return;
+            }
+
+            history.push(packageToSave);
+            localStorage.setItem('tourism_package_history', JSON.stringify(history));
+            if(showAlert) alert('تم حفظ العرض بنجاح في السجل');
+          };
+
 
           const ToggleButton = ({ enabled, onToggle, label, color = "blue" }) => {
             const colorClasses = {
@@ -1007,7 +1032,7 @@
                         تحميل العرض
                       </button>
                       <button
-                        onClick={() => alert('This will save the package to the history. Backend not implemented yet.')}
+                        onClick={savePackage}
                         className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg hover:from-green-700 hover:to-teal-700 transition-all shadow-lg hover:shadow-xl text-lg font-bold"
                       >
                         <Download size={24} />
