@@ -104,7 +104,8 @@
             cities: '',
             travelDate: '',
             nights: '',
-            persons: '',
+            adults: '1',
+            children: '0',
             level: '',
             headerImage: 'https://images.pexels.com/photos/386009/pexels-photo-386009.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             
@@ -666,7 +667,7 @@
                 <div class="header-content">
                     <h1 class="title">برنامج خاص ل${formData.clientName} ل${formData.destination}</h1>
                     <h2 class="subtitle">${formData.cities}</h2>
-                    <h3 class="subtitle">${formData.phoneNumber}</h3>
+                    <h3 class="subtitle">${formData.phoneNumber} | البالغين: ${formData.adults} | الأطفال: ${formData.children}</h3>
                 </div>
             </div>
             
@@ -1105,17 +1106,17 @@
                         <div><label className="block text-sm font-semibold text-gray-700 mb-2">اسم العميل</label><input type="text" value={formData.clientName} onChange={(e) => updateField('clientName', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" /></div>
                         <div><label className="block text-sm font-semibold text-gray-700 mb-2">رقم الجوال</label><input type="text" value={formData.phoneNumber} onChange={(e) => updateField('phoneNumber', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent rtl-input" /></div>
                         <div><label className="block text-sm font-semibold text-gray-700 mb-2">الوجهة</label><input type="text" value={formData.destination} onChange={(e) => updateField('destination', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" /></div>
-                      </div>
-
-                      <div><label className="block text-sm font-semibold text-gray-700 mb-2">المدن</label><input type="text" value={formData.cities} onChange={(e) => updateField('cities', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" /></div>
-
-                      <div className="grid grid-cols-2 gap-6">
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">تاريخ السفر</label><input type="text" value={formData.travelDate} onChange={(e) => updateField('travelDate', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" /></div>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">عدد الليالي</label><input type="text" value={formData.nights} onChange={(e) => updateField('nights', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" /></div>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">عدد الأفراد</label><input type="text" value={formData.persons} onChange={(e) => updateField('persons', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" /></div>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">المستوى</label><input type="text" value={formData.level} onChange={(e) => updateField('level', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" /></div>
-                      </div>
-                    </div>
+                                                </div>
+                      
+                                            <div><label className="block text-sm font-semibold text-gray-700 mb-2">المدن</label><input type="text" value={formData.cities} onChange={(e) => updateField('cities', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" /></div>
+                      
+                                            <div className="grid grid-cols-2 gap-6">
+                                              <div><label className="block text-sm font-semibold text-gray-700 mb-2">تاريخ السفر</label><input type="text" value={formData.travelDate} onChange={(e) => updateField('travelDate', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" /></div>
+                                              <div><label className="block text-sm font-semibold text-gray-700 mb-2">عدد الليالي</label><input type="text" value={formData.nights} onChange={(e) => updateField('nights', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" /></div>
+                                              <div><label className="block text-sm font-semibold text-gray-700 mb-2">عدد البالغين</label><input type="number" value={formData.adults} onChange={(e) => updateField('adults', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="1" /></div>
+                                              <div><label className="block text-sm font-semibold text-gray-700 mb-2">عدد الأطفال</label><input type="number" value={formData.children} onChange={(e) => updateField('children', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" /></div>
+                                              <div><label className="block text-sm font-semibold text-gray-700 mb-2">المستوى</label><input type="text" value={formData.level} onChange={(e) => updateField('level', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" /></div>
+                                            </div>                    </div>
                   )}
 
                   {/* Flight Tab - التبويب مكتمل بالكامل كما في الملف الأصلي */}
