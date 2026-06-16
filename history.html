@@ -18,7 +18,7 @@
 <body>
     <div id="root"></div>
     
-    <script type="text/babel">
+    <script type="text/babel" data-presets="react" data-type="module">
         const { useState, useEffect } = React;
 
         const Trash2 = ({ size = 24, className = "" }) => (
@@ -124,7 +124,8 @@
             );
         }
 
-        ReactDOM.render(<HistoryPage />, document.getElementById('root'));
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<HistoryPage />);
     </script>
 </body>
 </html>
