@@ -22,8 +22,9 @@
 <body>
     <div id="root"></div>
     
-    <script type="text/babel" data-presets="react" data-type="module">
-        const { useState, useEffect } = React;
+    <script type="text/babel">
+        /** @jsx React.createElement */
+        const { useState } = React;
         
         // Lucide Icons as simple SVG components
         const Download = ({ size = 24, className = "" }) => (
@@ -1631,8 +1632,7 @@
           );
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<TourismPackageGenerator />);
+        ReactDOM.render(<TourismPackageGenerator />, document.getElementById('root'));
     </script>
 </body>
 </html>
