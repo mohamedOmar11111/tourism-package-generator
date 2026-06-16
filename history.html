@@ -124,7 +124,8 @@
             );
         }
 
-        ReactDOM.render(<HistoryPage />, document.getElementById('root'));
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<HistoryPage />);
     </script>
 </body>
 </html>
