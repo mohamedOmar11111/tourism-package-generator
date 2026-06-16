@@ -448,20 +448,7 @@
         };
             
             const htmlContent = generateHTML();
-            
-            // Use iframe for better rendering of the full HTML document
-            const iframe = document.createElement('iframe');
-            iframe.style.width = '100%';
-            iframe.style.height = '1400px';
-            iframe.style.border = 'none';
-            iframe.style.borderRadius = '8px';
-            packageDetailsContainer.innerHTML = '';
-            packageDetailsContainer.appendChild(iframe);
-            
-            const doc = iframe.contentWindow.document;
-            doc.open();
-            doc.write(htmlContent);
-            doc.close();
+            packageDetailsContainer.innerHTML = htmlContent;
 
             const downloadHTML = () => {
                 const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
